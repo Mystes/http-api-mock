@@ -4,6 +4,9 @@ import net.sf.jaceko.mock.dom.DocumentImpl;
 import net.sf.jaceko.mock.matcher.OperationHavingNameEqualTo;
 import net.sf.jaceko.mock.model.webservice.WebserviceOperation;
 import net.sf.jaceko.mock.util.FileReader;
+
+import org.hamcrest.core.IsNot;
+import org.hamcrest.core.IsNull;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -32,7 +35,8 @@ public class WsdlProcessorTest {
         assertThat(operationsFromWsdl, hasItem(new OperationHavingNameEqualTo("lockRequestElement")));
         assertThat(operationsFromWsdl, hasItem(new OperationHavingNameEqualTo("unlockRequestElement")));
         assertThat(operationsFromWsdl, hasItem(new OperationHavingNameEqualTo("purgeRequestElement")));
-
+        assertThat(wsdlProcessor.getWsdlNamespaces().size(), is(4));
+        
     }
 
     @Test
@@ -41,7 +45,6 @@ public class WsdlProcessorTest {
             fileReader.readFileContents("hello-for-unit-tests.wsdl"));
         assertThat(operationsFromWsdl.size(), is(1));
         assertThat(operationsFromWsdl, hasItem(new OperationHavingNameEqualTo("sayHello")));
-
     }
 
     @Test

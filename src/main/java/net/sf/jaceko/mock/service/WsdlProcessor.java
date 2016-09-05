@@ -43,6 +43,7 @@ public class WsdlProcessor {
     private static final Logger LOG = Logger.getLogger(WsdlProcessor.class);
 
     private WSDLFactory factory;
+    private Map<String, String> namespaces;
 
     public WsdlProcessor() {
         try {
@@ -59,6 +60,7 @@ public class WsdlProcessor {
         WSDLReader wsdlReader = factory.newWSDLReader();
         try {
             Definition def = wsdlReader.readWSDL(null, new InputSource(new StringReader(fileText)));
+            namespaces = def.getNamespaces();
             SoapMessageBuilder soapMessageBuilder = new SoapMessageBuilder(def, fileText);
             Map<QName, Binding> bindingsMap = def.getBindings();
             Collection<Binding> bindings = bindingsMap.values();
@@ -100,6 +102,16 @@ public class WsdlProcessor {
         }
 
         return mockOperations;
+    }
+    
+    /**
+     * Gets namespaces parsed from given WSDL in getOperationsFromWsdl method.
+     * getOperationsFromWsdl must first be invoked.
+     * 
+     * @return Map containing prefixes as keys and namespaces as values
+     */
+    public Map<String, String> getWsdlNamespaces() {
+    	return namespaces;
     }
 
 }
