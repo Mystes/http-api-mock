@@ -133,6 +133,10 @@ Endpoints are configured in `ws-mock.properties` file under `resources` folder. 
     <td>name of wsdl file, relevant only to SOAP webservices; the wsdl file should be placed in the classpath visible to the mock service application</td>
 </tr>
 <tr>
+    <td>SERVICE[i].VALIDATE_SCHEMA</td>
+    <td>boolean value <b>true</b> to validate, or <b>false</b> (or not present at all) to not validate namespaces of request as defined in WSDL file</td>
+</tr>
+<tr>
     <td>SERVICE[i].OPERATION[j].INPUT_MESSAGE</td>
     <td>(optional) root element of request message; relevant only to SOAP webservices; skip this if WSDL is provided, this information will be read from the WSDL file</td>
 </tr>
