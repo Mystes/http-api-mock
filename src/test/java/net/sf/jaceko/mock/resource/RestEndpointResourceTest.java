@@ -243,6 +243,42 @@ public class RestEndpointResourceTest {
         assertThat((String) response.getEntity(), is(responseReturnedByServiceLayer));
 
     }
+    
+    @Test
+    public void shouldPerformPatchRequest() {
+        String request = "<dummyRequest>def</dummyRequest>";
+        resource.performPatchRequest(SERVICE_NAME, mockHttpHeaders, request);
+        verify(requestExecutor).performRequest(SERVICE_NAME, "PATCH", request, null, null, headers);
+    }
+    
+    @Test
+    public void shouldPerformPatchRequestWithHeaders() {
+        String request = "<dummyRequest>def</dummyRequest>";
+
+        headers.putSingle("someheader", "headervalue");
+        headers.putSingle("someotherheader", "anotherheadervalue");
+
+        resource.performPatchRequest(SERVICE_NAME, mockHttpHeaders, request);
+
+        verify(requestExecutor).performRequest(SERVICE_NAME, "PATCH", request, null, null, headers);
+    }
+    
+    @Test
+    public void shouldPerformPatchRequestPassingResourceId() {
+        String resourceId = "resId12";
+        String request = "<dummyRequest>abc</dummyRequest>";
+        resource.performPatchRequest(SERVICE_NAME, resourceId, mockHttpHeaders, request);
+        verify(requestExecutor).performRequest(SERVICE_NAME, "PATCH", request, null, resourceId, headers);
+    }
+    
+    @Test
+    public void shouldReturnPATCH_CONFLICTResponse() {
+        String responseReturnedByServiceLayer = "someResponse123";
+        when(requestExecutor.performRequest(anyString(), anyString(), anyString(), anyString(), anyString(), any(MultivaluedMap.class))).thenReturn(
+            new MockResponse(responseReturnedByServiceLayer, 409));
+        Response response = resource.performPatchRequest(SERVICE_NAME, mockHttpHeaders, null);
+        assertThat((String) response.getEntity(), is(responseReturnedByServiceLayer));
+    }
 
     @Test
     public void shouldPerformDeleteRequest() {
