@@ -81,6 +81,8 @@ public class PropertyProcessor {
     private static final String BINARY = "BINARY";
     
     private static final String NAMESPACE = "NAMESPACE";
+    
+    private static final String VALIDATE_SCHEMA = "VALIDATE_SCHEMA";
 
     private static final Pattern SERVICE_PATTERN = Pattern.compile("^SERVICE\\[([0-9]+)\\]$");
     private static final Pattern OPERATION_PATTERN = Pattern.compile("^OPERATION\\[([0-9]+)\\]$");
@@ -158,8 +160,29 @@ public class PropertyProcessor {
             service.setIgnoreXmlDeclaration(Boolean.valueOf(propertyValue));
         } else if (serviceProperty.equals(ENABLE_RESOURCE_PATHS)) {
             service.setEnableResourcePaths(Boolean.valueOf(propertyValue));
+        } else if (serviceProperty.equals(VALIDATE_SCHEMA) && propertyValue.equals("true")) {
+        	StringBuilder operationsNamespaces = getCommaSeparatedWsdlNamespaces();
+        	
+        	Collection<WebserviceOperation> operations = service.getOperations();
+        	for(WebserviceOperation operation : operations) {
+        		operation.setNameSpaces(operationsNamespaces.toString());
+        	}
         }
     }
+
+	private StringBuilder getCommaSeparatedWsdlNamespaces() {
+		StringBuilder operationsNamespaces = new StringBuilder();
+		Map<String, String> namespaces = wsdlProcessor.getWsdlNamespaces();
+		boolean first = true;
+		for (String ns : namespaces.values()) {
+			if (!first) {
+				operationsNamespaces.append(",");
+			}
+			operationsNamespaces.append(ns);
+			first = false;
+		}
+		return operationsNamespaces;
+	}
 
     private WebService getService(final Map<Integer, WebService> services, final int serviceIndex) {
         WebService service = services.get(serviceIndex);
@@ -207,10 +230,12 @@ public class PropertyProcessor {
         if( operation.isBinary() ) {
             operation.setDefaultResponseBinaryContent(fileReader.readBinaryFileContents(operation.getDefaultResponseFile()));
         } else {
-            final String fileText = fileReader.readFileContents(operation.getDefaultResponseFile());
-            if (fileText != null) {
-                operation.setDefaultResponseText(fileText);
-            }
+        	if (operation.getDefaultResponseFile() != null) {
+	            final String fileText = fileReader.readFileContents(operation.getDefaultResponseFile());
+	            if (fileText != null) {
+	                operation.setDefaultResponseText(fileText);
+	            }
+        	}
         }
     }
 

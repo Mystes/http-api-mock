@@ -7,7 +7,10 @@ import net.sf.jaceko.mock.matcher.OperationHavingNameEqualTo;
 import net.sf.jaceko.mock.model.webservice.WebService;
 import net.sf.jaceko.mock.model.webservice.WebserviceOperation;
 import net.sf.jaceko.mock.util.FileReader;
+
+import org.hamcrest.core.IsNull;
 import org.junit.Test;
+import org.mockito.internal.matchers.*;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -22,7 +25,7 @@ import java.util.Collection;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNull.*;
 import static org.hamcrest.xml.HasXPath.hasXPath;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
@@ -38,7 +41,8 @@ public class PropertyProcessorFileReadingTest {
     @Test
     public void shouldReadWsdlContentsFromFile() throws IOException, ParserConfigurationException, SAXException {
         String propertyString = "SERVICE[0].NAME=ticketing\r\n" + "SERVICE[0].WSDL=hello-for-unit-tests.wsdl\r\n"
-            + "SERVICE[0].TYPE=SOAP\r\n" + "SERVICE[0].OPERATION[0].INPUT_MESSAGE=someRequest\r\n";
+            + "SERVICE[0].TYPE=SOAP\r\n" + "SERVICE[0].OPERATION[0].INPUT_MESSAGE=someRequest\r\n" 
+        	+ "SERVICE[0].VALIDATE_SCHEMA=true";
 
         Reader reader = new StringReader(propertyString);
         MockConfigurationHolder configuration = propertyProcessor.process(reader);
@@ -47,7 +51,7 @@ public class PropertyProcessorFileReadingTest {
         String wsdlText = soapService.getWsdlText();
         Document wsdlDoc = new DocumentImpl(wsdlText);
         assertThat(wsdlDoc, hasXPath("/definitions/message/@name", equalTo("SayHelloRequest")));
-
+        assertThat(soapService.getOperations().iterator().next().getNameSpaces(), is(notNullValue()));
     }
 
     @Test
@@ -67,7 +71,6 @@ public class PropertyProcessorFileReadingTest {
 
         assertThat(responseDoc, hasXPath("/dummyResponse/reqId", equalTo("789789")));
         assertThat(responseDoc, hasXPath("/dummyResponse/status", equalTo("OK")));
-
     }
 
     @Test
@@ -82,6 +85,7 @@ public class PropertyProcessorFileReadingTest {
         WebService soapService = services.iterator().next();
         WebserviceOperation operation = soapService.getOperation(0);
         assertThat(operation, notNullValue());
+        assertThat(operation.getNameSpaces(), nullValue());
 
     }
 

@@ -26,6 +26,8 @@ import net.sf.jaceko.mock.service.MockConfigurationHolder;
 import net.sf.jaceko.mock.service.RequestExecutor;
 import org.apache.log4j.Logger;
 
+import fi.mystes.http.api.PATCH;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -110,6 +112,23 @@ public class RestEndpointResource {
                                       @Context HttpHeaders headers, String request) {
         validateResourcePath(serviceName, resourcePath);
         MockResponse mockResponse = svcLayer.performRequest(serviceName, HttpMethod.PUT.toString(), request, null, resourcePath, headers.getRequestHeaders());
+        LOG.debug("serviceName: " + serviceName + ", response:" + mockResponse);
+        return buildWebserviceResponse(mockResponse);
+    }
+    
+    @PATCH
+    @Consumes({"text/*", "application/*"})
+    public Response performPatchRequest(@PathParam("serviceName") String serviceName, @Context HttpHeaders headers, String request) {
+        return performPatchRequest(serviceName, null, headers, request);
+    }
+
+    @PATCH
+    @Path("/{postfix: (([^/]+?(/)?)+?)}")
+    @Consumes({"text/*", "application/*"})
+    public Response performPatchRequest(@PathParam("serviceName") String serviceName, @PathParam("postfix") String resourcePath,
+                                      @Context HttpHeaders headers, String request) {
+        validateResourcePath(serviceName, resourcePath);
+        MockResponse mockResponse = svcLayer.performRequest(serviceName, "PATCH", request, null, resourcePath, headers.getRequestHeaders());
         LOG.debug("serviceName: " + serviceName + ", response:" + mockResponse);
         return buildWebserviceResponse(mockResponse);
     }
